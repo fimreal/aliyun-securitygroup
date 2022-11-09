@@ -31,7 +31,7 @@ WINDOWS_ARCH_LIST = \
 all: linux-amd64 darwin-amd64 windows-amd64 # Most used
 
 docker:
-    docker build -t $(NAME) ./
+	docker build -t $(NAME) ./
 
 docker-in:
 	$(GOBUILD) -o $(BINDIR)/$(NAME) $(APPDIR)
