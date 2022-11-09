@@ -90,36 +90,40 @@ func (s *staff) authorize() error {
 	if err != nil {
 		return err
 	}
-	ezap.Infof("Response: %#v, Client IP: %s  was successfully added to the Security Group.\n", res, s.ip)
+	ezap.Infof("Response: %#v, Client IP: %s  was successfully added to the Security Group.", res, s.ip)
 
 	return nil
 }
 
 func (s *staff) verify() bool {
 	ezap.Info("request details: ", s)
-	c := newClient()
 
+	if iptools.IsLanIPv4(s.ip) {
+		return false
+	}
+
+	c := newClient()
 	r := ecs.CreateDescribeSecurityGroupsRequest()
 	r.Scheme = "https"
-	r.RegionId = "cn-zhangjiakou"
+	r.RegionId = REGION_ID
 	r.SecurityGroupId = s.sgid
 
 	resJSON, err := c.DescribeSecurityGroups(r)
-	res := &ecs.DescribeSecurityGroupsResponse{}
 	if err != nil {
 		ezap.Error(err)
 		return false
 	}
+	res := &ecs.DescribeSecurityGroupsResponse{}
 	err = json.Unmarshal(resJSON.GetHttpContentBytes(), res)
 	if err != nil {
 		ezap.Error(err)
 		return false
 	}
 	if len(res.SecurityGroups.SecurityGroup) == 0 {
-		ezap.Error(s.sgid, " is not exists ", res.SecurityGroups.SecurityGroup)
+		ezap.Error(s.sgid, " is not exists ", res)
 		return false
 	}
 	ezap.Info("检查安全组是否存在，", res)
 
-	return !iptools.IsLanIPv4(s.ip)
+	return true
 }
