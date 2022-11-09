@@ -113,17 +113,19 @@ func (s *staff) verify() bool {
 		ezap.Error(err)
 		return false
 	}
+	// 解析返回数据
 	res := &ecs.DescribeSecurityGroupsResponse{}
 	err = json.Unmarshal(resJSON.GetHttpContentBytes(), res)
 	if err != nil {
 		ezap.Error(err)
 		return false
 	}
+
+	ezap.Info("开始检查安全组是否存在，", s.sgid)
 	if len(res.SecurityGroups.SecurityGroup) == 0 {
-		ezap.Error(s.sgid, " is not exists ", res)
+		ezap.Error(s.sgid, " is not exists ", res.SecurityGroups.SecurityGroup)
 		return false
 	}
-	ezap.Info("检查安全组是否存在，", res)
 
 	return true
 }
